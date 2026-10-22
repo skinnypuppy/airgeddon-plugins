@@ -140,10 +140,10 @@ function evilqr_posthook_launch_fake_ap() {
 
 	debug_print
 
-	evilqr_generate_join_qr
-
-	echo
-	language_strings "${language}" "evilqr_2" "yellow"
+	if evilqr_generate_join_qr; then
+		echo
+		language_strings "${language}" "evilqr_2" "yellow"
+	fi
 
 	return 0
 }

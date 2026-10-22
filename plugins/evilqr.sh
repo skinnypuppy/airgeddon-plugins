@@ -127,9 +127,15 @@ function evilqr_generate_join_qr() {
 	echo
 	language_strings "${language}" "evilqr_1" "blue"
 
-	qrencode -t ANSIUTF8 -m 2 -l M "${qr_payload}"
+	if ! qrencode -t ANSIUTF8 -m 2 -l M "${qr_payload}"; then
+		return 1
+	fi
 
-	qrencode -t PNG -m 4 -s 6 -l M -o "${qr_file}" "${qr_payload}"
+	if ! qrencode -t PNG -m 4 -s 6 -l M -o "${qr_file}" "${qr_payload}"; then
+		return 1
+	fi
+
+	return 0
 }
 
 ###### FUNCTION HOOKING: POSTHOOK ######

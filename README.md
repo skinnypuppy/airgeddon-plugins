@@ -16,8 +16,8 @@ this repository is the canonical home where development happens first.
 
 airgeddon's Evil Twin attacks traditionally rely on deauthentication to herd
 victims onto the rogue access point: kick the client off the real network
-and hope it (or its user) wanders onto your twin. EvilQR adds a second,
-**silent association vector** — the moment airgeddon launches the fake access
+and hope it (or its user) wanders onto your twin. EvilQR adds an additional
+way to associate by scanning a QR code. After airgeddon launches the fake access
 point, the plugin renders a scannable QR code (directly in the terminal,
 plus a PNG file) containing the standard `WIFI:` network-configuration
 payload that the built-in cameras of Android and iOS understand:
@@ -26,37 +26,43 @@ payload that the built-in cameras of Android and iOS understand:
 WIFI:S:<evil twin ESSID>;T:nopass;;
 ```
 
-A victim who scans the code with a stock phone camera joins the Evil Twin
-**immediately and with zero interaction** — no password prompt (airgeddon's
-evil twin is an open AP), no network list, no deauth required. Print the QR
-on a sticker, display it on a screen, embed it in a page: any context where
-a human might point a phone at a square code becomes an association
-opportunity.
+A victim can scan the code with a compatible phone camera to join the Evil
+Twin without entering a password, because the fake access point is open.
+The phone may ask for confirmation before joining. The plugin does not
+disable or replace airgeddon's existing deauthentication flow; QR scanning
+provides an additional way to associate. The PNG can be printed or displayed
+on another screen for scanning.
 
 Technical details worth knowing:
 
-- **The zero-width space is preserved.** airgeddon distinguishes the twin
-  from the original network by appending an invisible zero-width space
-  (U+200B) to the target ESSID (`generate_fake_essid`). EvilQR carries the
-  ESSID verbatim — invisible character included — so a scanning phone joins
-  the **Evil Twin**, not the legitimate access point. Strip that character
-  and the phone would silently join the real network instead.
+- **The fake access point's ESSID is preserved.** EvilQR uses `et_essid`
+  directly, including the invisible zero-width space (U+200B) added by
+  airgeddon's `generate_fake_essid` when ESSID stripping is enabled. On
+  versions with `AIRGEDDON_EVIL_TWIN_ESSID_STRIPPING`, disabling that option
+  also leaves the character out of the QR payload. The plugin does not
+  append another character or change the ESSID selected by airgeddon.
 - **Special characters are escaped.** The `WIFI:` payload format reserves
   `\ ; , : "` — all are backslash-escaped, so twin ESSIDs cloned from
   real-world SSIDs decode correctly.
-- **PNG output.** The QR is also saved as `evilqr_<essid>.png` in the
-  directory airgeddon was launched from (next to airgeddon's other attack
-  outputs), for use outside the terminal.
+- **PNG output.** The QR is also saved as `evilqr_<filtered_essid>.png` in
+  airgeddon's current working directory. The filename retains only
+  alphanumeric characters, underscores and hyphens from the ESSID. The
+  success message displays the absolute path. With tmux startup, the
+  working directory can be airgeddon's script directory rather than the
+  original launch directory. Existing files with the same name are overwritten.
 - **WPA-Enterprise awareness.** airgeddon's enterprise (hostapd-wpe) evil
   twin mode doesn't fit the `WIFI:` join format, so the plugin detects it
   and skips generation with a notice instead of producing a broken code.
-- **Multilingual.** Strings ship in English and Spanish through airgeddon's
-  plugin language hook; more languages can be added with one line each
-  (see [Development](#development) below).
+- **Multilingual.** Strings are provided through airgeddon's plugin language
+  hook in all 13 supported languages: English, Spanish, French, Catalan,
+  Portuguese, Russian, Greek, Italian, Polish, German, Turkish, Arabic and
+  Chinese. Translations other than English and Spanish retain the
+  `pending_of_translation` marker for review.
 
 ### How to use it
 
-1. **Install the plugin** (see the distro table below).
+1. **Install the plugin** (see the distro table below). It is enabled by
+   default; ensure airgeddon's `AIRGEDDON_PLUGINS_ENABLED` setting is `true`.
 2. **Install `qrencode`** — the only dependency. If it's missing, the
    plugin prints a warning and the attack proceeds normally without the QR.
 3. Run `sudo airgeddon` and walk your normal Evil Twin flow, for example:
@@ -64,16 +70,17 @@ Technical details worth knowing:
    - menu `7` → *Evil Twin attacks menu*
    - `4` → *Explore for targets* → select the target network to clone
    - back at the Evil Twin menu → `5` → *Evil Twin attack only AP*
-     (or any other Evil Twin mode)
+     (or another non-Enterprise Evil Twin mode)
    - pick a deauth attack as prompted (airgeddon requires this choice in
-     its flow — note there is no "skip" option; the QR association works
-     with or without the deauth running alongside)
+     its flow; the plugin leaves that flow unchanged)
    - select the internet-sharing interface when asked
 4. When the attack windows launch, you'll see the **EvilQR banner**, the
-   QR code rendered in ANSI in your terminal, and a notice naming the PNG
-   file that was saved.
+   QR code rendered in ANSI in airgeddon's main terminal, and a notice
+   showing the absolute path of the PNG file after successful generation.
+   The plugin does not open a separate QR window or add the QR to the captive
+   portal page.
 5. Have the target scan it — point a phone camera at your terminal or the
-   PNG. The phone joins the twin instantly.
+   PNG, then confirm the connection if prompted by the phone.
 
 **What success looks like on the wire:** the hostapd window shows the
 phone's MAC in `AP-STA-CONNECTED` / association lines, and airgeddon's
@@ -86,13 +93,20 @@ Evil Twin control window lists it as a connected client.
 - Internet connectivity for the victim depends on the attack mode you
   chose (an only-AP attack with an internet interface shares routing;
   captive-portal modes intercept instead).
+- If terminal QR rendering fails, PNG generation is not attempted. If
+  rendering or PNG generation fails, the plugin does not display the PNG
+  success message, and airgeddon's normal flow continues. Enterprise mode
+  is skipped with a notice and does not produce a PNG success message.
 - Test against networks you own or are authorized to test. EvilQR makes
   association *easier*, which makes authorization *more* important.
 
 ### Requirements per distro
 
-The plugin needs exactly one external tool: `qrencode`. Package names and
-airgeddon's plugin location vary:
+The plugin requires **airgeddon 11.51 or later**. Its language hook was
+introduced in 11.41, and the `et_essid` variable it uses was introduced in 11.51.
+
+It adds one dependency to airgeddon's existing requirements: `qrencode`.
+Package names and airgeddon's plugin location vary:
 
 | Distro | Install qrencode | Plugin directory |
 |---|---|---|
@@ -108,10 +122,10 @@ Installation is copying one file:
 cp plugins/evilqr.sh /usr/share/airgeddon/plugins/   # or your clone's plugins/ dir
 ```
 
-After copying the file, the plugin **ships disabled** (`plugin_enabled=0`)
-so it never changes behavior without consent — it is opt-in by design.
-Enable it by editing `plugin_enabled=1` in the plugin file, then start
-airgeddon. Remove the file to uninstall.
+The plugin **ships enabled** (`plugin_enabled=1`). Start or restart airgeddon
+after copying the file so its hooks are loaded. To disable it, set
+`plugin_enabled=0` in the plugin file and restart airgeddon. Remove the file
+to uninstall.
 
 ### Phone compatibility
 
@@ -120,8 +134,9 @@ airgeddon. Remove the file to uninstall.
 | Android 9+ (stock camera / Google Lens) | yes — older versions and some OEM camera apps vary; any ZXing-based scanner app works |
 | iOS 11+ | yes — Camera app recognizes and joins |
 
-Because airgeddon's Evil Twin is an open network (`T:nopass`), joining
-requires no further interaction on any platform.
+The QR describes an open network (`T:nopass`), so no password is required.
+Recognition and connection prompts depend on the phone and scanner app;
+scanning does not guarantee an automatic connection without confirmation.
 
 ### Verified
 
@@ -134,12 +149,15 @@ requires no further interaction on any platform.
 ### Development
 
 - The plugin hooks airgeddon's `launch_fake_ap` via the posthook mechanism
-  (`evilqr_posthook_launch_fake_ap`), so it fires in every Evil Twin mode
-  at the exact moment the AP goes live.
+  (`evilqr_posthook_launch_fake_ap`). It runs after that function returns
+  and skips QR generation when Enterprise mode is active.
 - User-visible strings are registered through the `hookable_for_languages`
   prehook (`evilqr_prehook_hookable_for_languages`). To add a language,
   add one `arr["<LANGUAGE>","evilqr_N"]` line per string — the pattern
   follows airgeddon's own `missing_dependencies` plugin.
+- Keep runtime variables such as `\${et_essid}` and `\${qr_file}` escaped
+  in language assignments so airgeddon expands them when displaying the
+  message rather than when registering the strings.
 - Patches and fixes land here first; upstream airgeddon PRs are cut from
   this repository.
 

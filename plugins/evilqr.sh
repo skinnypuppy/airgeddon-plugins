@@ -106,7 +106,7 @@ function evilqr_generate_join_qr() {
 
 	debug_print
 
-	if ! command -v qrencode > /dev/null 2>&1; then
+	if ! hash qrencode 2> /dev/null; then
 		language_strings "${language}" "evilqr_4" "red"
 		return 1
 	fi

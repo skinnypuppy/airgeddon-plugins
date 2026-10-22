@@ -12,7 +12,7 @@ plugin_enabled=1
 
 ###### PLUGIN REQUIREMENTS ######
 
-plugin_minimum_ag_affected_version="10.0"
+plugin_minimum_ag_affected_version="11.51"
 plugin_maximum_ag_affected_version=""
 
 plugin_distros_supported=("*")

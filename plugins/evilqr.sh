@@ -126,6 +126,7 @@ function evilqr_generate_join_qr() {
 
 	echo
 	language_strings "${language}" "evilqr_1" "blue"
+	echo
 
 	if ! qrencode -t ANSIUTF8 -m 2 -l M "${qr_payload}"; then
 		return 1

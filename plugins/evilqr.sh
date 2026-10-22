@@ -36,19 +36,19 @@ function evilqr_prehook_hookable_for_languages() {
 	arr["ARABIC","evilqr_1"]="\${pending_of_translation} :(\${normal_color}\${et_essid}\${green_color} :ESSID) Evil Twin للاتصال بنقطة الوصول QR اطلب من الضحية مسح رمز .[بدون إلغاء المصادقة Evil Twin الاتصال بـ] \${blue_color}EvilQR إضافة"
 	arr["CHINESE","evilqr_1"]="\${pending_of_translation} EvilQR 插件 [无需取消认证即可连接 Evil Twin]. 让受害者扫描此二维码以连接 Evil Twin 接入点 (ESSID: \${normal_color}\${et_essid}\${green_color}):"
 
-	arr["ENGLISH","evilqr_2"]="The QR code was also saved as \${normal_color}\${qr_file}\${yellow_color} in the directory where airgeddon was launched"
-	arr["SPANISH","evilqr_2"]="El código QR también se ha guardado como \${normal_color}\${qr_file}\${yellow_color} en el directorio donde se lanzó airgeddon"
-	arr["FRENCH","evilqr_2"]="\${pending_of_translation} Le code QR a également été enregistré sous \${normal_color}\${qr_file}\${yellow_color} dans le répertoire depuis lequel airgeddon a été lancé"
-	arr["CATALAN","evilqr_2"]="\${pending_of_translation} El codi QR també s'ha desat com a \${normal_color}\${qr_file}\${yellow_color} al directori des d'on s'ha iniciat airgeddon"
-	arr["PORTUGUESE","evilqr_2"]="\${pending_of_translation} O código QR também foi guardado como \${normal_color}\${qr_file}\${yellow_color} no diretório onde o airgeddon foi iniciado"
-	arr["RUSSIAN","evilqr_2"]="\${pending_of_translation} QR-код также сохранён в файле \${normal_color}\${qr_file}\${yellow_color} в каталоге, из которого был запущен airgeddon"
-	arr["GREEK","evilqr_2"]="\${pending_of_translation} Ο κωδικός QR αποθηκεύτηκε επίσης ως \${normal_color}\${qr_file}\${yellow_color} στον κατάλογο από τον οποίο εκκινήθηκε το airgeddon"
-	arr["ITALIAN","evilqr_2"]="\${pending_of_translation} Il codice QR è stato salvato anche come \${normal_color}\${qr_file}\${yellow_color} nella directory da cui è stato avviato airgeddon"
-	arr["POLISH","evilqr_2"]="\${pending_of_translation} Kod QR został również zapisany jako \${normal_color}\${qr_file}\${yellow_color} w katalogu, z którego uruchomiono airgeddon"
-	arr["GERMAN","evilqr_2"]="\${pending_of_translation} Der QR-Code wurde auch als \${normal_color}\${qr_file}\${yellow_color} im Verzeichnis gespeichert, aus dem airgeddon gestartet wurde"
-	arr["TURKISH","evilqr_2"]="\${pending_of_translation} QR kodu ayrıca airgeddon'ın başlatıldığı dizine \${normal_color}\${qr_file}\${yellow_color} olarak kaydedildi"
-	arr["ARABIC","evilqr_2"]="\${pending_of_translation} airgeddon في المجلد الذي تم تشغيل \${normal_color}\${qr_file}\${yellow_color} أيضًا باسم QR تم حفظ رمز"
-	arr["CHINESE","evilqr_2"]="\${pending_of_translation} 二维码也已保存为 \${normal_color}\${qr_file}\${yellow_color}，位于启动 airgeddon 的目录中"
+	arr["ENGLISH","evilqr_2"]="The QR code was also saved as \${normal_color}\${qr_file}\${yellow_color}"
+	arr["SPANISH","evilqr_2"]="El código QR también se ha guardado como \${normal_color}\${qr_file}\${yellow_color}"
+	arr["FRENCH","evilqr_2"]="\${pending_of_translation} Le code QR a également été enregistré sous \${normal_color}\${qr_file}\${yellow_color}"
+	arr["CATALAN","evilqr_2"]="\${pending_of_translation} El codi QR també s'ha desat com a \${normal_color}\${qr_file}\${yellow_color}"
+	arr["PORTUGUESE","evilqr_2"]="\${pending_of_translation} O código QR também foi guardado como \${normal_color}\${qr_file}\${yellow_color}"
+	arr["RUSSIAN","evilqr_2"]="\${pending_of_translation} QR-код также сохранён в файле \${normal_color}\${qr_file}\${yellow_color}"
+	arr["GREEK","evilqr_2"]="\${pending_of_translation} Ο κωδικός QR αποθηκεύτηκε επίσης ως \${normal_color}\${qr_file}\${yellow_color}"
+	arr["ITALIAN","evilqr_2"]="\${pending_of_translation} Il codice QR è stato salvato anche come \${normal_color}\${qr_file}\${yellow_color}"
+	arr["POLISH","evilqr_2"]="\${pending_of_translation} Kod QR został również zapisany jako \${normal_color}\${qr_file}\${yellow_color}"
+	arr["GERMAN","evilqr_2"]="\${pending_of_translation} Der QR-Code wurde auch als \${normal_color}\${qr_file}\${yellow_color} gespeichert"
+	arr["TURKISH","evilqr_2"]="\${pending_of_translation} QR kodu ayrıca \${normal_color}\${qr_file}\${yellow_color} olarak kaydedildi"
+	arr["ARABIC","evilqr_2"]="\${pending_of_translation} \${normal_color}\${qr_file}\${yellow_color} أيضًا باسم QR تم حفظ رمز"
+	arr["CHINESE","evilqr_2"]="\${pending_of_translation} 二维码也已保存为 \${normal_color}\${qr_file}\${yellow_color}"
 
 	arr["ENGLISH","evilqr_3"]="EvilQR plugin [WPA-Enterprise mode detected]. Skipping WiFi join QR generation"
 	arr["SPANISH","evilqr_3"]="Plugin EvilQR [modo WPA-Enterprise detectado]. Omitiendo la generación del código QR de conexión"
@@ -122,7 +122,7 @@ function evilqr_generate_join_qr() {
 	qr_ssid=$(evilqr_escape_wifi_string "${et_essid}")
 	qr_payload="WIFI:S:${qr_ssid};T:nopass;;"
 
-	qr_file="evilqr_$(printf '%s' "${et_essid}" | tr -cd '[:alnum:]_-').png"
+	qr_file="${PWD%/}/evilqr_$(printf '%s' "${et_essid}" | tr -cd '[:alnum:]_-').png"
 
 	echo
 	language_strings "${language}" "evilqr_1" "blue"

@@ -108,9 +108,10 @@ Installation is copying one file:
 cp plugins/evilqr.sh /usr/share/airgeddon/plugins/   # or your clone's plugins/ dir
 ```
 
-There is nothing to enable — airgeddon discovers and loads the plugin on
-its next start (`plugin_enabled=1` is already set). Remove the file to
-disable it.
+After copying the file, the plugin **ships disabled** (`plugin_enabled=0`)
+so it never changes behavior without consent — it is opt-in by design.
+Enable it by editing `plugin_enabled=1` in the plugin file, then start
+airgeddon. Remove the file to uninstall.
 
 ### Phone compatibility
 

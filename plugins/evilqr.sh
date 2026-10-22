@@ -22,11 +22,11 @@ plugin_distros_supported=("*")
 #Language strings for EvilQR
 function evilqr_prehook_hookable_for_languages() {
 
-	arr["ENGLISH","evilqr_1"]="\${blue_color}EvilQR plugin \${normal_color}[Evil Twin association without deauthentication]. \${green_color}Have the victim scan this QR code to join the Evil Twin access point (ESSID: \${normal_color}${et_essid}\${green_color}):"
-	arr["SPANISH","evilqr_1"]="\${blue_color}Plugin EvilQR \${normal_color}[Asociación al Evil Twin sin desautenticación]. \${green_color}Haz que la víctima escanee este código QR para unirse al punto de acceso Evil Twin (ESSID: \${normal_color}${et_essid}\${green_color}):"
+	arr["ENGLISH","evilqr_1"]="\${blue_color}EvilQR plugin \${normal_color}[Evil Twin association without deauthentication]. \${green_color}Have the victim scan this QR code to join the Evil Twin access point (ESSID: \${normal_color}\${et_essid}\${green_color}):"
+	arr["SPANISH","evilqr_1"]="\${blue_color}Plugin EvilQR \${normal_color}[Asociación al Evil Twin sin desautenticación]. \${green_color}Haz que la víctima escanee este código QR para unirse al punto de acceso Evil Twin (ESSID: \${normal_color}\${et_essid}\${green_color}):"
 
-	arr["ENGLISH","evilqr_2"]="\${yellow_color}The QR code was also saved as \${normal_color}${qr_file}\${yellow_color} in the directory where airgeddon was launched"
-	arr["SPANISH","evilqr_2"]="\${yellow_color}El código QR también se ha guardado como \${normal_color}${qr_file}\${yellow_color} en el directorio donde se lanzó airgeddon"
+	arr["ENGLISH","evilqr_2"]="\${yellow_color}The QR code was also saved as \${normal_color}\${qr_file}\${yellow_color} in the directory where airgeddon was launched"
+	arr["SPANISH","evilqr_2"]="\${yellow_color}El código QR también se ha guardado como \${normal_color}\${qr_file}\${yellow_color} en el directorio donde se lanzó airgeddon"
 
 	arr["ENGLISH","evilqr_3"]="\${blue_color}EvilQR plugin \${normal_color}[\${yellow_color}WPA-Enterprise\${normal_color} mode detected]. \${yellow_color}Skipping WiFi join QR generation"
 	arr["SPANISH","evilqr_3"]="\${blue_color}Plugin EvilQR \${normal_color}[modo \${yellow_color}WPA-Enterprise\${normal_color} detectado]. \${yellow_color}Omitiendo la generación del código QR de conexión"
@@ -79,6 +79,9 @@ function evilqr_generate_join_qr() {
 	qr_payload="WIFI:S:${qr_ssid};T:nopass;;"
 
 	qr_file="evilqr_$(printf '%s' "${et_essid}" | tr -cd '[:alnum:]_-').png"
+
+	echo
+	language_strings "${language}" "evilqr_1" "blue"
 
 	qrencode -t ANSIUTF8 -m 2 -l M "${qr_payload}"
 
